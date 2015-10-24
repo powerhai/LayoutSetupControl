@@ -1,0 +1,274 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+    xmlns:controls="clr-namespace:WpfCnxLayoutSetControlDemo.Controls"
+    xmlns:models="clr-namespace:WpfCnxLayoutSetControlDemo.Models"
+    xmlns:system="clr-namespace:System;assembly=mscorlib"
+    xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+    xmlns:comboboxEx="clr-namespace:WpfCnxLayoutSetControlDemo.Controls.ComboboxEx">
+    <system:Double x:Key="MinWidth">100</system:Double>
+    <Brush x:Key="MouseOverBrush" >LightSkyBlue</Brush>
+    <Brush x:Key="SelectedBrush" >LightSkyBlue</Brush>
+    
+    <ControlTemplate x:Key="DeviceTemplate">
+        <Border x:Name="Border" SnapsToDevicePixels="True" MinWidth="{StaticResource  MinWidth}"  Background="Gainsboro"  BorderThickness="1" BorderBrush="DarkGray" CornerRadius="3,3,0,0" Padding="5" >
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="5"></ColumnDefinition>
+                    
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock x:Name="Label" Text="{Binding DeviceType}"  Visibility="Visible"></TextBlock>
+                <ComboBox x:Name="ComboBox_DeviceType"   Visibility="Collapsed"  SelectedValue="{Binding DeviceType,Mode=OneWay}" ItemsSource="{Binding  AvailableDeviceTypes}"
+                               >
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="DropDownOpened">
+                            <controls:ExecuteCommandAction Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox,Mode=FindAncestor},Path=DataContext.SetDeviceTypeCommand}" CommandParameter="{Binding }"  ></controls:ExecuteCommandAction>
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="SelectionChanged">
+                            <controls:ExecuteCommandAction Command="{Binding RelativeSource={RelativeSource AncestorType=ListBox,Mode=FindAncestor},Path=DataContext.SelectDeviceTypeCommand}" CommandParameter="{Binding ElementName=ComboBox_DeviceType,Path=SelectedValue}"  ></controls:ExecuteCommandAction>
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </ComboBox>
+                <Button x:Name="Button" Grid.Column="2" Visibility="Collapsed" Style="{DynamicResource MiniButtonStyle}" Background="{DynamicResource PicRight}" Command="{Binding  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox} ,Path=DataContext.SetDeviceReserceCommand}" CommandParameter="{Binding .}">X</Button>
+            </Grid>
+            
+            
+        </Border>
+        <ControlTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <Setter TargetName="ComboBox_DeviceType" Property="Visibility" Value="Visible"></Setter>
+                <Setter TargetName="Label" Property="Visibility" Value="Collapsed"></Setter>
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource MouseOverBrush}"></Setter>
+                <Setter TargetName="Button" Property="Visibility" Value="Visible"></Setter>
+            </DataTrigger>
+            
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                 <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBrush}"></Setter>
+            </DataTrigger>
+            
+            <DataTrigger Binding="{Binding DeviceType}" Value="{x:Static models:DeviceType.Outlet}"> 
+                <Setter TargetName="Border" Property="CornerRadius" Value="3"></Setter>
+            </DataTrigger>
+            
+            <DataTrigger Binding="{Binding DeviceType}" Value="{x:Static models:DeviceType.None}">
+                <Setter TargetName="ComboBox_DeviceType" Property="Visibility" Value="Visible"></Setter>
+                <Setter TargetName="Label" Property="Visibility" Value="Collapsed"></Setter>
+                <Setter TargetName="Border" Property="Background" Value="Wheat"></Setter>
+                <Setter TargetName="Border" Property="CornerRadius" Value="3"></Setter>
+            </DataTrigger>
+            
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding IsReverse}" Value="false"></Condition>
+                    <Condition Binding="{Binding ParentTLane.IsReverse}" Value="false"></Condition>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter TargetName="Button" Property="Background" Value="{DynamicResource PicLeft}"></Setter>
+                </MultiDataTrigger.Setters>
+            </MultiDataTrigger>
+            <MultiDataTrigger>
+                <MultiDataTrigger.Conditions>
+                    <Condition Binding="{Binding IsReverse}" Value="true"></Condition>
+                    <Condition Binding="{Binding ParentTLane.IsReverse}" Value="true"></Condition>
+                </MultiDataTrigger.Conditions>
+                <MultiDataTrigger.Setters>
+                    <Setter TargetName="Button" Property="Background" Value="{DynamicResource PicLeft}"></Setter>
+                </MultiDataTrigger.Setters>
+            </MultiDataTrigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+   
+    <DataTemplate DataType="{x:Type models:LcTLane}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Border SnapsToDevicePixels="True"  x:Name="Border"  Background="Gainsboro"  BorderThickness="1" BorderBrush="DarkGray" CornerRadius="3,3,0,0" Padding="5"  >
+               <Grid>
+                   <Grid.ColumnDefinitions>
+                       <ColumnDefinition Width="*"></ColumnDefinition>
+                       <ColumnDefinition Width="Auto"></ColumnDefinition>
+                   </Grid.ColumnDefinitions>
+                    <CheckBox IsChecked="{Binding IsSelected}" Command="{Binding  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox} ,Path=DataContext.SetTLaneCheckedCommand}" CommandParameter="{Binding .}">#1</CheckBox>
+                    <Button Grid.Column="1"  x:Name="Button" Style="{DynamicResource MiniButtonStyle}"  Background="{DynamicResource PicUp}"  Command="{Binding  RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ListBox} ,Path=DataContext.SetTLaneReserceCommand}" CommandParameter="{Binding .}"  >X</Button>
+               </Grid>
+                
+            </Border>
+            <Border Grid.Row="1"    SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+                <TextBlock  Foreground="Gray">Local No:  2,3</TextBlock>
+            </Border>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding IsReverse}" Value="false">
+                <Setter TargetName="Button" Property="Background" Value="{DynamicResource PicDown}"></Setter>
+            </DataTrigger>
+            
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                  <Setter TargetName="Border" Property="Background" Value="{StaticResource MouseOverBrush}"></Setter>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBrush}"></Setter>
+            </DataTrigger>
+            
+        </DataTemplate.Triggers>
+    </DataTemplate>
+    
+    <DataTemplate DataType="{x:Type models:LcInlet}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+      <Border x:Name="Border"  SnapsToDevicePixels="True" Background="Gainsboro"  BorderThickness="1" BorderBrush="DarkGray" CornerRadius="3,3,0,0"  Padding="5" >
+            <TextBlock >Inlet</TextBlock>
+     </Border>
+        <Border Grid.Row="1"    SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+            <TextBlock  Foreground="Gray">Local No:  2,3</TextBlock>
+        </Border>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource MouseOverBrush}"></Setter>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBrush}"></Setter>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate> 
+    <DataTemplate DataType="{x:Type models:LcErrorLane}">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Border x:Name="Border" SnapsToDevicePixels="True"  Background="Gainsboro"  BorderThickness="1" BorderBrush="DarkGray" CornerRadius="3,3,0,0" Padding="5" >
+           
+                <TextBlock >Error Lane</TextBlock>
+           
+        </Border>
+     <Border Grid.Row="1"    SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+                    <TextBlock  Foreground="Gray">Local No:  2,3</TextBlock>
+                </Border>
+            </Grid>
+    <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource MouseOverBrush}"></Setter>
+            </DataTrigger>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsMouseOver}" Value="True">
+                <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBrush}"></Setter>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+            
+</DataTemplate> 
+    <DataTemplate DataType="{x:Type models:LcOnlineTestInstrument}">
+        <Grid   MinWidth="{StaticResource MinWidth }">
+            <Grid  x:Name="DisplayGrid" Visibility="Visible" >
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <ContentControl Template="{StaticResource DeviceTemplate}"  ></ContentControl>
+            <Border Grid.Row="1"  SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <TextBlock  Foreground="Gray">Type: AU5800</TextBlock>
+                    <TextBlock   Grid.Row="1"  Foreground="Gray">IP:  127.0.0.1</TextBlock> 
+                </Grid>
+            </Border>
+        </Grid>
+            <Grid   x:Name="EditGrid" Visibility="Collapsed" >
+             
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <ContentControl Template="{StaticResource DeviceTemplate}"  ></ContentControl>
+            <Border Grid.Row="1"  SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="3"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <ComboBox Grid.Row="0"   SelectedIndex="0" >
+                            <system:String>AU5800</system:String>
+                            <system:String>DxI</system:String>
+                        </ComboBox>
+                        <TextBox   Grid.Row="2" Foreground="Gray">127.0.0.1</TextBox>
+                </Grid>
+                
+            </Border>
+        </Grid>
+        </Grid>
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <Setter TargetName="EditGrid" Property="Visibility" Value="Visible"></Setter>
+                <Setter TargetName="DisplayGrid" Property="Visibility" Value="Collapsed"></Setter>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type models:LcNoneDevice}">
+        <ContentControl Template="{StaticResource DeviceTemplate}"  ></ContentControl>
+    </DataTemplate> 
+    <DataTemplate DataType="{x:Type models:LcOutlet}">
+        <ContentControl Template="{StaticResource DeviceTemplate}"    Background="Gainsboro"></ContentControl>
+       
+    </DataTemplate>
+    <DataTemplate DataType="{x:Type models:LcStorage}">
+        <Grid    MinWidth="{StaticResource MinWidth }">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <ContentControl Template="{StaticResource DeviceTemplate}"  ></ContentControl>
+            <Border Grid.Row="1"  SnapsToDevicePixels="True" Background="WhiteSmoke" Padding="5" BorderThickness="1,0,1,1" BorderBrush="DarkGray" CornerRadius="0,0,3,3" >
+                <Grid>
+                    <Grid x:Name="DisplayGrid" Visibility="Visible">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Foreground="Gray">Type:  Ambient</TextBlock>
+                        <TextBlock Grid.Row="1" Foreground="Gray">Size:  3K</TextBlock>
+                    </Grid>
+                    <Grid x:Name="EditGrid" Visibility="Collapsed" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
+                            <RowDefinition Height="3"></RowDefinition>
+                            <RowDefinition Height="Auto"></RowDefinition> 
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="3"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Foreground="Black">Type</TextBlock>
+                        
+                        <ComboBox Grid.Row="0" Grid.Column="2"  SelectedIndex="0" >
+                            <system:String>Refrigerated</system:String>
+                            <system:String>Ambient</system:String>
+                        </ComboBox>
+                        <TextBlock  Grid.Row="2"  Foreground="Black">Size</TextBlock>
+                        <ComboBox  Grid.Row="2" Grid.Column="2" SelectedIndex="0" >
+                            <system:String>3K</system:String>
+                            <system:String>5K</system:String>
+                        </ComboBox>
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+        
+        <DataTemplate.Triggers>
+            <DataTrigger Binding="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ListBoxItem}}, Path=IsSelected}" Value="True">
+                <Setter TargetName="EditGrid" Property="Visibility" Value="Visible"></Setter>
+                <Setter TargetName="DisplayGrid" Property="Visibility" Value="Collapsed"></Setter>
+            </DataTrigger>
+        </DataTemplate.Triggers>
+    </DataTemplate>
+</ResourceDictionary>
